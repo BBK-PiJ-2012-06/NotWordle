@@ -29,10 +29,7 @@ function Row({ id, activeRow, submitGuess }) {
       var result = submitGuess(word);
       if (result) setResult(result);
     }
-    if (event.key === "Backspace") {
-      console.log(
-        "row handle backspace, updating active box to be " + (activeBox - 1)
-      );
+    if (event.key === "Backspace" && activeBox > 0) {
       setActiveBox(activeBox - 1);
     }
   }
@@ -40,7 +37,9 @@ function Row({ id, activeRow, submitGuess }) {
   const updateLetter = (index, letter) => {
     word[index] = letter;
     setWord(word);
-    setActiveBox(activeBox + 1);
+    if (letter.trim() !== "") {
+      setActiveBox(activeBox + 1);
+    }
   };
 
   return (
