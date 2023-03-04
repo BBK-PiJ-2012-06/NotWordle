@@ -17,26 +17,15 @@ export default function Box({
   const inputRef = useRef();
 
   useEffect(() => {
-    // console.log(
-    //   "in use effect for box " +
-    //     id +
-    //     "; index " +
-    //     index +
-    //     "; active box " +
-    //     activeBox
-    // );
     if (activeBox === index) {
-      // console.log("ACTIVATE!");
       inputRef.current.focus();
     }
   }, [activeBox, index, id]);
 
   const handleChange = (e) => {
-    console.log("box handle change");
     var newLetter = e.target.value.toUpperCase();
     setLetter(newLetter);
     updateLetter(index, newLetter);
-    console.log("box active box " + activeBox + "; box index " + index);
   };
 
   return (

@@ -17,10 +17,11 @@ import Row from "./Row";
 //   T: 1,
 // };
 
-const theWord = "LOOPS"; //TODO pick word from a list
+const theWord = "SPELL"; //TODO pick word from a list
 const letterCounts = {
-  L: 1,
-  O: 2,
+  //should construct this really...
+  L: 2,
+  E: 1,
   P: 1,
   S: 1,
 };
@@ -44,7 +45,6 @@ function BWordle() {
     }
     var newActiveRow = activeRow + 1;
     setActiveRow(newActiveRow);
-    // console.log("active row = " + newActiveRow);
   }, [activeRow, win]);
 
   useEffect(() => {
@@ -60,43 +60,36 @@ function BWordle() {
     let correctLettersTotal = 0;
     let correctLetterCounts = {};
     let presentLetterCounts = {};
-    for (let index = 0; index < guess.length; index++) {
-      let letter = guess[index];
 
-      if (!letter || letter.trim() === "") {
+    for (let index = 0; index < guess.length; index++) {
+      let guessLetter = guess[index];
+
+      if (!guessLetter || guessLetter.trim() === "") {
         return null;
       }
 
-      let numberInWord = letterCounts[letter] ?? 0;
-      console.log("number of " + letter + "s in word: " + numberInWord);
+      let numberInWord = letterCounts[guessLetter] ?? 0;
+      let correctCountForLetter = correctLetterCounts[guessLetter] ?? 0;
+      let presentCountForLetter = presentLetterCounts[guessLetter] ?? 0;
 
-      if (letter === theWord[index]) {
-        result[index] = { letter: letter, state: "correct" };
-        let correctCountForLetter = correctLetterCounts[letter] ?? 0;
-        correctLetterCounts[letter] = correctCountForLetter + 1;
-        correctLettersTotal++;
-
-        let remainingOfThisLetter = correctLetterCounts[letter] - numberInWord;
-        for (let i = 0; i < index; i++) {
-          if (result[i].letter === letter && result[i].state === "present") {
-            if (remainingOfThisLetter <= 0) {
-              result[i].state = "incorrect";
-            }
-            remainingOfThisLetter--;
-          }
-        }
-      } else if (theWord.includes(letter)) {
-        let correctCountForLetter = correctLetterCounts[letter] ?? 0;
-        let presentCountForLetter = presentLetterCounts[letter] ?? 0;
-
-        if (numberInWord - correctCountForLetter - presentCountForLetter > 0) {
-          presentLetterCounts[letter] = presentCountForLetter + 1;
-          result[index] = { letter: letter, state: "present" };
-        } else {
-          result[index] = { letter: letter, state: "incorrect" };
-        }
+      if (guessLetter === theWord[index]) {
+        handleCorrectGuess(
+          index,
+          guessLetter,
+          correctCountForLetter,
+          numberInWord
+        );
+      } else if (theWord.includes(guessLetter)) {
+        handlePresentGuess(
+          numberInWord,
+          correctCountForLetter,
+          presentCountForLetter,
+          guessLetter,
+          index
+        );
       } else {
-        result[index] = { letter: letter, state: "incorrect" };
+        //incorrect letter
+        result[index] = { letter: guessLetter, state: "incorrect" };
       }
     }
     if (correctLettersTotal === 5) {
@@ -106,6 +99,48 @@ function BWordle() {
     }
     incrementActiveRow();
     return result;
+
+    function handlePresentGuess(
+      numberInWord,
+      correctCountForLetter,
+      presentCountForLetter,
+      guessLetter,
+      index
+    ) {
+      //if there are remaining instances of this letter in the word: present; otherwise incorrect
+      if (numberInWord - correctCountForLetter - presentCountForLetter > 0) {
+        presentLetterCounts[guessLetter] = presentCountForLetter + 1;
+        result[index] = { letter: guessLetter, state: "present" };
+      } else {
+        result[index] = { letter: guessLetter, state: "incorrect" };
+      }
+    }
+
+    function handleCorrectGuess(
+      index,
+      guessLetter,
+      correctCountForLetter,
+      numberInWord
+    ) {
+      //correct letter
+      result[index] = { letter: guessLetter, state: "correct" };
+      correctLetterCounts[guessLetter] = correctCountForLetter + 1;
+      correctLettersTotal++;
+
+      let remainingOfThisLetter =
+        correctLetterCounts[guessLetter] - numberInWord;
+
+      //update previous letter results in case a letter marked present has now been found
+      //if there are no remaining unfound instances of this letter, prior "present" results should be "incorrect"
+      for (let i = 0; i < index; i++) {
+        if (result[i].letter === guessLetter && result[i].state === "present") {
+          if (remainingOfThisLetter <= 0) {
+            result[i].state = "incorrect";
+          }
+          remainingOfThisLetter--;
+        }
+      }
+    }
   };
 
   return (
