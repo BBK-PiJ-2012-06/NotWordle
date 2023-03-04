@@ -1,0 +1,16 @@
+.letterBox {
+  text-transform: uppercase;
+  height: 50px;
+  width: 50px;
+  text-align: center;
+  font-size: larger;
+  font-weight: bold;
+}
+
+.letterBox.present {
+  background-color: #b59f3b;
+}
+
+.letterBox.correct {
+  background-color: #538d4e;
+}
